@@ -52,6 +52,7 @@ services:
       # Ports under 60 might see errors when unquoted
       # https://stackoverflow.com/questions/58810789/quotes-on-docker-compose-yml-ports-make-any-difference
       - "7:7"       # Echo
+      - "21:21"     # FTP
       - "22:22"     # SSH
       - "23:23"     # Telnet
       - "80:80"     # HTTP
