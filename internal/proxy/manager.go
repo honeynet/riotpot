@@ -36,7 +36,6 @@ type ProxyManager interface {
 
 // Simple implementation of the proxy manager
 // This manager has access to the proxy endpoints registered. However, it does not observe newly
-//
 type ProxyManagerItem struct {
 	ProxyManager
 
@@ -49,12 +48,6 @@ type ProxyManagerItem struct {
 
 // Create a new proxy and add it to the manager
 func (pm *ProxyManagerItem) CreateProxy(network globals.Network, port int) (pe Proxy, err error) {
-
-	// Check if there is another proxy with the same port
-	if proxy, _ := pm.GetProxyFromParams(network, port); proxy != nil {
-		err = fmt.Errorf("proxy already registered")
-		return
-	}
 
 	// Create the proxy
 	pe, err = NewProxyEndpoint(port, network)
@@ -133,35 +126,6 @@ func (pm *ProxyManagerItem) DeleteProxy(id string) (err error) {
 
 func (pm *ProxyManagerItem) GetProxies() []Proxy {
 	return pm.proxies
-}
-
-// Returns a proxy by the port number
-func (pm *ProxyManagerItem) GetProxyFromParams(network globals.Network, port int) (pe Proxy, err error) {
-	// Iterate the proxies registered, and if the proxy using the given port is found, return it
-	for _, proxy := range pm.proxies {
-		if proxy.GetPort() == port && proxy.GetNetwork() == network {
-			pe = proxy
-			return
-		}
-	}
-
-	// If the proxy was not foun, send an error
-	err = fmt.Errorf("proxy not found")
-	return
-}
-
-// Set the service for some proxy
-func (pm *ProxyManagerItem) SetService(port int, service services.Service) (pe Proxy, err error) {
-	// Get the proxy from the list
-	pe, err = pm.GetProxyFromParams(service.GetNetwork(), port)
-	if err != nil {
-		return
-	}
-
-	// If the proxy was found, set the service
-	pe.SetService(service)
-
-	return
 }
 
 // Constructor for the proxy manager
