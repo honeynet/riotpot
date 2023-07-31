@@ -90,6 +90,7 @@ services:
     container_name: custom_http
     ports:
       - "80:80"
+      - "443:443"   # Expose port 443 for HTTPS
 
   modbus:
     image: oitc/modbus-server
