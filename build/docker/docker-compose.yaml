@@ -85,11 +85,11 @@ services:
     <<: *protocol
 
   http:
-    image: httpd
-    container_name: http
+    build:
+      context: ./service/custom_httpd   # Directory containing the custom Dockerfile and index.html
+    container_name: custom_http
     ports:
       - "80:80"
-    <<: *protocol
 
   modbus:
     image: oitc/modbus-server
