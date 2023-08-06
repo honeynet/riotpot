@@ -112,6 +112,17 @@ services:
     networks:
       default:
 
+  telnet:
+    build:
+      context: ./service/custom_telnet
+      dockerfile: Dockerfile
+    container_name: telnet
+    restart: always
+    ports:
+      - "23:23"  # Map port 23 for Telnet
+    networks:
+      default:
+
   modbus:
     image: oitc/modbus-server
     container_name: modbus
