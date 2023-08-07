@@ -112,6 +112,17 @@ services:
     networks:
       default:
 
+  ssh:
+    build:
+      context: ./service/custom_sshd
+      dockerfile: Dockerfile
+    container_name: ssh
+    restart: always
+    ports:
+      - "2222:22"  # Map port 2222 for SSH
+    networks:
+      default:
+
   telnet:
     build:
       context: ./service/custom_telnet
