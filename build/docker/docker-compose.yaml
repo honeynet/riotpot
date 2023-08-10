@@ -76,7 +76,7 @@ services:
   ##########################################
   # Use the profile `protocol` to mount the image but do not start it
   # riotpot will deetermine which containers to start at a later time
-    
+
   mqtt:
     image: eclipse-mosquitto
     container_name: mqtt
@@ -85,11 +85,54 @@ services:
     <<: *protocol
 
   http:
-    image: httpd
+    build:
+      context: ./service/custom_httpd   # Directory containing the custom Dockerfile and index.html
     container_name: http
     ports:
       - "80:80"
-    <<: *protocol
+      - "443:443"   # Expose port 443 for HTTPS
+
+
+  ftp:
+    build:
+      context: ./service/custom_ftpd
+      dockerfile: Dockerfile
+    container_name: ftp
+    restart: always
+    ports:
+      - "21:21"                    # Map port 21 for FTP control
+      - "21000-21010:21000-21010"  # Map ports for passive mode data transfer
+    environment:
+      - USERS=ftpuser|password     # Set the default FTP user (you can add more users here)
+      # Passive mode ports range
+      - MIN_PORT=21000
+      - MAX_PORT=21010
+    volumes:
+      - ./ftp_data:/ftp/ftpuser:Z       # Map the FTP data directory
+    networks:
+      default:
+
+  ssh:
+    build:
+      context: ./service/custom_sshd
+      dockerfile: Dockerfile
+    container_name: ssh
+    restart: always
+    ports:
+      - "22:22"  # Map port 2222 for SSH
+    networks:
+      default:
+
+  telnet:
+    build:
+      context: ./service/custom_telnet
+      dockerfile: Dockerfile
+    container_name: telnet
+    restart: always
+    ports:
+      - "23:23"  # Map port 23 for Telnet
+    networks:
+      default:
 
   modbus:
     image: oitc/modbus-server
