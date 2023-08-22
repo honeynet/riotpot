@@ -88,24 +88,26 @@ func (se *ServiceManagerItem) AddServices(services ...Service) (serv []Service, 
 func (se *ServiceManagerItem) CreateService(name string, port int, network globals.Network, host string, interaction globals.Interaction) (s Service, err error) {
 	// Iterate the services to determine whether the
 	for _, service := range se.GetServices() {
-		// Validate the name
-		if service.GetName() == name {
-			err = fmt.Errorf("service name already taken")
+		// Validate the name and interaction
+		if service.GetName() == name && service.GetInteraction().String() == interaction.String() {
+			err = fmt.Errorf("service already included: %s (%s) - %s", name, interaction.String(), service.GetInteraction().String())
 			return
 		}
 
 		// Validate the address
 		if service.GetPort() == port && service.GetNetwork() == network && service.GetHost() == host {
-			err = fmt.Errorf("service address already taken")
+			err = fmt.Errorf("service address already taken: %s:%d", network.String(), port)
 			return
 		}
 	}
 
 	// Create the new service
 	s = NewService(name, port, network, host, interaction)
+	_, err = se.AddServices(s)
+	if err != nil {
+		return nil, err
+	}
 
-	// Append the new service to the list
-	se.services = append(se.services, s)
 	return
 }
 
