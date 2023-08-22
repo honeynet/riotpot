@@ -2,10 +2,10 @@
 FROM ubuntu
 
 # Install Telnet
-RUN apt-get update && apt-get install -y telnet
+RUN apt-get update && apt-get install -y telnetd
 
 # Expose port 23 for Telnet
 EXPOSE 23
 
-# Set Telnet as the entry point
-CMD ["telnet", "localhost"]
+# Start Telnet server using telnetd
+CMD ["/usr/sbin/in.telnetd", "-debug", "23"]

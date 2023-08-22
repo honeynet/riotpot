@@ -86,11 +86,13 @@ services:
 
   http:
     build:
-      context: ./service/custom_httpd   # Directory containing the custom Dockerfile and index.html
+      context: ./service/custom_httpd
     container_name: http
     ports:
       - "80:80"
-      - "443:443"   # Expose port 443 for HTTPS
+      - "443:443"
+    networks:
+      honeypot:
 
 
   ftp:
@@ -100,17 +102,18 @@ services:
     container_name: ftp
     restart: always
     ports:
-      - "21:21"                    # Map port 21 for FTP control
-      - "21000-21010:21000-21010"  # Map ports for passive mode data transfer
+      - "21:21"
+      - "21000-21010:21000-21010"
     environment:
-      - USERS=ftpuser|password     # Set the default FTP user (you can add more users here)
       # Passive mode ports range
       - MIN_PORT=21000
       - MAX_PORT=21010
     volumes:
       - ./ftp_data:/ftp/ftpuser:Z       # Map the FTP data directory
+    secrets:
+      - ftp_users
     networks:
-      default:
+      honeypot:
 
   ssh:
     build:
@@ -119,9 +122,11 @@ services:
     container_name: ssh
     restart: always
     ports:
-      - "22:22"  # Map port 2222 for SSH
+      - "22:22"
+    secrets:
+      - ssh_users
     networks:
-      default:
+      honeypot:
 
   telnet:
     build:
@@ -130,9 +135,9 @@ services:
     container_name: telnet
     restart: always
     ports:
-      - "23:23"  # Map port 23 for Telnet
+      - "23:23"
     networks:
-      default:
+      honeypot:
 
   modbus:
     image: oitc/modbus-server
@@ -147,6 +152,12 @@ services:
     ports:
       - "443:443"
     <<: *protocol
+
+secrets:
+  ftp_users:
+    file: ./service/custom_ftpd/ftp_users.txt
+  ssh_users:
+    file: ./service/custom_sshd/ssh_users.txt
 
 networks:
   honeypot:

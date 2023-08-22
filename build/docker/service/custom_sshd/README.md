@@ -7,6 +7,16 @@ This custom SSH service is designed for testing purposes only and should not be 
 1. Password-based authentication for the root user is enabled, which is generally not recommended for security reasons.
 2. Key-based authentication authentication is crucial for securing your SSH service. Below are the steps to generate SSH keys. 
 
+
+## Configure Password-Based Authetication
+Inside the directory where  `Dockerfile` for the SSH service is in, create a file named `ssh_users.txt` . In this file, add your FTP user credentials in the format `username:password`.
+
+Example `ssh_users.txt`:
+```
+root:password
+```
+
+
 ## Generating SSH Keys 
 
 Generate keys in `service/custom_sshd/keys`:
