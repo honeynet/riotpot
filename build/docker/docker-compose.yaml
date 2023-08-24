@@ -108,10 +108,9 @@ services:
       # Passive mode ports range
       - MIN_PORT=21000
       - MAX_PORT=21010
+      - USERS=${USERS}
     volumes:
-      - ./ftp_data:/ftp/ftpuser:Z       # Map the FTP data directory
-    secrets:
-      - ftp_users
+      - ./ftp_data:/ftp/ftpuser:Z
     networks:
       honeypot:
 
@@ -154,8 +153,6 @@ services:
     <<: *protocol
 
 secrets:
-  ftp_users:
-    file: ./service/custom_ftpd/ftp_users.txt
   ssh_users:
     file: ./service/custom_sshd/ssh_users.txt
 
