@@ -76,7 +76,7 @@ services:
   ##########################################
   # Use the profile `protocol` to mount the image but do not start it
   # riotpot will deetermine which containers to start at a later time
-    
+
   mqtt:
     image: eclipse-mosquitto
     container_name: mqtt
@@ -85,11 +85,58 @@ services:
     <<: *protocol
 
   http:
-    image: httpd
+    build:
+      context: ./service/custom_httpd
     container_name: http
-    expose:
-      - "80"
-    <<: *protocol
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      honeypot:
+
+
+  ftp:
+    build:
+      context: ./service/custom_ftpd
+      dockerfile: Dockerfile
+    container_name: ftp
+    restart: always
+    ports:
+      - "21:21"
+      - "21000-21010:21000-21010"
+    environment:
+      # Passive mode ports range
+      - MIN_PORT=21000
+      - MAX_PORT=21010
+      - USERS=${USERS}
+    volumes:
+      - ./ftp_data:/ftp/ftpuser:Z
+    networks:
+      honeypot:
+
+  ssh:
+    build:
+      context: ./service/custom_sshd
+      dockerfile: Dockerfile
+    container_name: ssh
+    restart: always
+    ports:
+      - "22:22"
+    secrets:
+      - ssh_users
+    networks:
+      honeypot:
+
+  telnet:
+    build:
+      context: ./service/custom_telnet
+      dockerfile: Dockerfile
+    container_name: telnet
+    restart: always
+    ports:
+      - "23:23"
+    networks:
+      honeypot:
 
   modbus:
     image: oitc/modbus-server
@@ -104,6 +151,10 @@ services:
     expose:
       - "443"
     <<: *protocol
+
+secrets:
+  ssh_users:
+    file: ./service/custom_sshd/ssh_users.txt
 
 networks:
   honeypot:
