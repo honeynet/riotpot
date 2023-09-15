@@ -6,17 +6,14 @@
   <img src="docs/assets/aau_logo.png" height="100px;" style="margin: 1em 0; padding: 1em;">
   <div>
     <!-- Workflow status -->
-    <a href="https://github.com/aau-network-security/RIoTPot/actions">
-        <img alt="GitHub Actions status" src="https://github.com/aau-network-security/RIoTPot/workflows/cyber/badge.svg">
+    <a href="https://github.com/honeynet/riotpot/actions">
+        <img alt="GitHub Actions status" src="https://github.com/honeynet/riotpot/workflows/Nightly/badge.svg">
     </a>
     <a href="https://pkg.go.dev/riopot">
         <img src="https://pkg.go.dev/badge/riopot.svg">
     </a>
-    <a href="https://goreportcard.com/badge/github.com/aau-network-security/RIoTPot">
-        <img src="https://goreportcard.com/badge/github.com/aau-network-security/RIoTPot?style=flat-square">
-    </a>
-    <a href="">
-        <img src="https://img.shields.io/github/release/RIoTPot/project-layout.svg?style=flat-square">
+    <a href="https://goreportcard.com/badge/github.com/honeynet/riotpot">
+        <img src="https://goreportcard.com/badge/github.com/honeynet/riotpot?style=flat-square">
     </a>
   </div>
 </div>
@@ -123,7 +120,7 @@ It is important to keep the internal folder structure for RIoTPot to work as int
 
 ---
 
-1. First, download the release of your choice from the [releases](https://github.com/aau-network-security/riotpot/releases) page. Choose the one you need for your Operative System (OS).
+1. First, download the release of your choice from the [releases](https://github.com/honeynet/riotpot/releases) page. Choose the one you need for your Operative System (OS).
 2. Extact the `riotpot` folder.
 3. Run the `riotpot` binary. This will start RIoTPot with the API enabled, all the plugins ready to use, and the UI server.
     - The API and UI are accessible through the address `localhost:2022`
