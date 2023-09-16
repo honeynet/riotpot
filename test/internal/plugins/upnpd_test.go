@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -38,7 +38,7 @@ func TestUpnpdServer(t *testing.T) {
 	assert.Equal(t, "text/xml", resp.Header.Get("Content-Type"))
 
 	// Read the response body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err)
 
 	// Check the response body

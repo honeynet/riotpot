@@ -4,19 +4,10 @@ import (
 	"crypto/tls"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func removeWhitespace(s string) string {
-	s = strings.ReplaceAll(s, " ", "")
-	s = strings.ReplaceAll(s, "\t", "")
-	s = strings.ReplaceAll(s, "\n", "")
-	s = strings.ReplaceAll(s, "\r", "")
-	return s
-}
 
 func TestValidPathHandler(t *testing.T) {
 	// Disable certificate verification for testing purposes
