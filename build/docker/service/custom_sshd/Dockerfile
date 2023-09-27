@@ -1,17 +1,7 @@
-FROM ubuntu
+FROM alpine:latest
 
 # Install OpenSSH
-RUN apt-get update && apt-get install -y openssh-server
-
-# Install OpenSSH server
-RUN apt-get update && apt-get install -y openssh-server
-
-# Copy the SSH public key to the container's root directory
-RUN mkdir -p /root/.ssh
-COPY keys/riotpot_ed25519.pub /root/.ssh/authorized_keys
-
-# Set up SSH configuration
-RUN mkdir /var/run/sshd
+RUN apk add --no-cache --update openssh
 
 # Add non-root users and set passwords
 COPY ssh_users.txt /tmp/ssh_users.txt
