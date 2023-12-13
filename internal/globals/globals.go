@@ -143,17 +143,3 @@ var (
 	// Port in where the API is listening
 	ApiPort string = environ.Getenv("API_PORT", "2022")
 )
-
-// Database
-var (
-	// Database username
-	DbUsername string = environ.Getenv("DB_USER", "username")
-	// Database user password
-	DbPassword string = environ.Getenv("DB_PASS", "password")
-	// Database host
-	DbHost string = environ.Getenv("DB_HOST", "localhost")
-	// Database port
-	DbPort string = environ.Getenv("DB_PORT", "5432")
-	// Database name of the targeted database
-	DbName string = environ.Getenv("DB_Name", "db")
-)

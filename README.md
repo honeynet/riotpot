@@ -152,18 +152,11 @@ It is important to keep the internal folder structure for RIoTPot to work as int
 1. Download the RIoTPot source code from GitHub. Open a console and introduce the following line.
 
     ```bash
-    git clone git@github.com:aau-network-security/riotpot.git
+    git clone git@github.com:honeynet/riotpot.git
     ```
 
 2. Navigate to the folder in where you have downloaded the RIoTPot source.
-3. If you have installed [Make](https://www.gnu.org/software/make/), we have included multiple command helpers to assist you building the project. To put it simple, you can run two simple commands that will build the RIoTPot binary and the plugins (and place them in the right folder).
-
-    ```bash
-    # Build the server
-    make build-ui
-    # Builds RIoTPot and the plugins
-    make riotpot-build
-    ```
+3. If you have installed [Make](https://www.gnu.org/software/make/), we have included multiple command helpers to assist you building the project. To put it simple, you can simply run `make` to build the RIoTPot binary and the plugins.
 
 </details>
 
@@ -192,7 +185,8 @@ While a single instance of RIoTPot is relatively lightweight, it is important to
 
 > **_Warning_:** Technically speaking, a dedicated attacker may realize that RIoTPot is in fact a honeypot by analysing and comparing the response-time delays introduced by virtualisation to real servers (!!). While this type of honeypot fingerprinting has been studied before, the results for common Internet services are still inconclussive (e.g., HTTP, Telnet and SSH), due to the commoditization of cloud hosting services using virtual machines and detailed server configurations.
 
-The `docker-compose` file includes additional services to enhance the RIoTPot experience.
+The `Dockerfile` included in this repo can be used as a standalone solution to load RIoTPot without any extras. To do this, simply build the image using the command `make docker-build` followed by `make docker-run`. 
+Alternatively, we included a `docker-compose` file with additional services to enhance the RIoTPot experience.
 The following table summarises the list of services and applications packed in this container.
 
 <blockquote>
@@ -229,7 +223,7 @@ The container can be setup in three simple steps:
 1. Download the RIoTPot source code from GitHub. Open a console and introduce the following line.
 
     ```bash
-    git clone git@github.com:aau-network-security/riotpot.git
+    git clone git@github.com:honeynet/riotpot.git
     ```
 
 2. Navigate to the folder in where you have downloaded the RIoTPot source.

@@ -42,7 +42,7 @@ var (
 	runApi      = flag.Bool("api", true, "Whether to start the API")
 	loadPlugins = flag.Bool("plugins", true, "Whether to load the low-interaction honeypot plugins")
 	//						  embeded ui ->  |---------------||--------------------| <- separated ui (debug)
-	allowedHosts = flag.String("whitelist", "http://localhost,http://localhost:3000", "List of allowed hosts to contact the API")
+	allowedHosts = flag.String("whitelist", "http://localhost,http://localhost:3000,http://127.0.0.1:3000,http://0.0.0.0:3000", "List of allowed hosts to contact the API")
 	loadUi       = flag.Bool("ui", true, "Whether to start the UI")
 )
 
@@ -103,7 +103,10 @@ func ParseFlags() {
 			ui.AddRoutes(router)
 		}
 
-		apiAddress := fmt.Sprintf("%s:%s", globals.ApiHost, globals.ApiPort)
-		router.Run(apiAddress)
+		apiAddress := fmt.Sprintf(":%s", globals.ApiPort)
+		err := router.Run(apiAddress)
+		if err != nil {
+			panic(err)
+		}
 	}
 }

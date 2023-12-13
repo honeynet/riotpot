@@ -46,7 +46,6 @@ services:
     container_name: riotpot
     build:
       context: ${PWD:-../..}/
-      dockerfile: build/docker/Dockerfile
     restart: always # restart riotpot when it crashes
     ports:
       # Ports under 60 might see errors when unquoted

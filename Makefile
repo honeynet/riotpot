@@ -1,46 +1,21 @@
-SHELL := /bin/bash
+# It's necessary to set this because some environments don't link sh -> bash.
+SHELL := /usr/bin/env bash -o errexit -o pipefail -o nounset
 
-# Makefile
-APPNAME=riotpot
-DOCKER=build/docker/
-PLUGINS_DIR=pkg/plugin
-EXCLUDE_PLUGINS= modbusd coapd mqttd
-
-# docker cmd below
-.PHONY:  docker-build-doc docker-doc-up up down up-all build build-plugins build-all build-ui serve-ui statik
-docker-build-doc:
-	docker build -f $(DOCKER)Dockerfile.documentation . -t $(APPNAME)/v1
-docker-doc-up: docker-build-doc
-	docker run -p 6060:6060 -it $(APPNAME)/v1
-up:
-	docker-compose -p riotpot -f ${DOCKER}docker-compose.yaml up -d --build
-down:
-	docker-compose -p riotpot -f ${DOCKER}docker-compose.yaml down -v
-up-all:
-	riotpot-doc
-	riotpot-up
+.PHONY: all build compile
+all: build compile
 build:
-	@go build -gcflags='all=-N -l' -o ./bin/ ./cmd/riotpot/.
-	@echo "Finished building Binary"
-build-plugins: $(PLUGINS_DIR)/*
-	@IFS=' ' read -r -a exclude <<< "${EXCLUDE_PLUGINS}"; \
-	for folder in $^ ; do \
-		result=$${folder%%+(/)}; \
-		result=$${result##*/}; \
-		result=$${result:-/}; \
-		if ! [[ $${exclude[*]} =~ "$${result}" ]]; then \
-			go build -buildmode=plugin --mod=mod -gcflags='all=-N -l' -o bin/plugins/$${result}.so $${folder}/*.go; \
-		fi \
-	done
-	@echo "Finished building plugins"
-build-ui:
-	@npm --prefix=./ui run build
-	@echo "Finished building UI"
-build-all: \
-	build \
-	build-plugins
-serve-ui:
-	@serve -s ./ui/build
+	build/build.sh
+compile:
+	build/compile.sh
 
-statik:
-	@statik -src=/api/swagger
+.PHONY: dev-ui
+dev-ui:
+	serve -s ./ui/build
+
+.PHONY: docker-run docker-build compose 
+docker-run: # TODO: finish this
+	docker run -d -it -p 2022:2022 riotpot:latest
+docker-build: # TODO: finish this
+	docker build -t riotpot:latest .
+compose:
+	docker compose -p riotpot -f build/docker/docker-compose.yaml up -d --build

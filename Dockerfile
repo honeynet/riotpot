@@ -1,4 +1,4 @@
-FROM node:19.4.0-alpine as ui
+FROM node:19.4.0-alpine AS ui
 
 # set working directory
 WORKDIR /app
@@ -6,24 +6,17 @@ WORKDIR /app
 # add `/app/node_modules/.bin` to $PATH
 ENV PATH /app/node_modules/.bin:$PATH
 
-# install app dependencies
-COPY ui/package*.json ./
-RUN npm install --silent
-RUN npm install react-scripts -g --silent
-
 # add app
 COPY ui/ .
+RUN npm install --silent
 
 # Creates the build
 RUN npm run build --omit=dev
 
-FROM golang:1.18 as builder
+FROM golang:1.18 AS builder
 
 # Set the working directory to golang working space
 WORKDIR /riotpot
-
-# Copy the files from the previous build into the ui folder
-COPY --from=ui app ui/
 
 # Copy the dependencies into the image
 COPY go.mod ./
@@ -31,6 +24,9 @@ COPY go.sum ./
 
 # download all the dependencies
 RUN go mod download
+
+# Copy the files from the previous build into the ui folder
+COPY ui ui/
 
 # Copy everything into the image
 # Copy only the app files in the image
@@ -42,25 +38,24 @@ COPY tools tools/
 
 # Copy static files
 COPY statik/ statik/
+COPY build build/
 
 ADD Makefile .
 
-RUN make build-all
+# Run the command from the Makefile to build the plugins
+# and riotpot
+RUN make
 
-# Run the command from the Makefile to build all the plugins
-# and build the project
-# -- Comment this line when on development if you know you have a ready to go version built --
-# Disclaimer: if you comment this line, be 100% sure that the binary can be run on linux
-FROM gcr.io/distroless/base-debian10
+FROM gcr.io/distroless/base-debian10 AS release
 
-ENV GIN_MODE=release
+#ENV GIN_MODE=release
 
 WORKDIR /riotpot
 
 # Copy the dependencies into the image
-COPY --from=builder /riotpot/bin/ ./
+COPY --from=builder /riotpot/bin/riotpot ./
 
-# API, required for the UI.
+# UI port
 EXPOSE 2022
 
 CMD ["./riotpot"]
