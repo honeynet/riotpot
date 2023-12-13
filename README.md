@@ -232,7 +232,7 @@ The container can be setup in three simple steps:
   
     ```bash
     # With make
-    make up
+    make compose
     ```
 
    - With Docker-compose
