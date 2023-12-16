@@ -1,0 +1,141 @@
+package proxy
+
+import (
+	"fmt"
+	"net"
+	"sync"
+
+	lr "github.com/riotpot/pkg/logger"
+	"github.com/riotpot/pkg/utils"
+)
+
+type udpProxy struct {
+	*baseProxy
+	listener *net.UDPConn
+}
+
+func (px *udpProxy) Start() (err error) {
+	// Check if the service is set
+	if px.GetService() == nil {
+		err = fmt.Errorf("service not set")
+		return
+	}
+
+	// Get the listener or create a new one
+	client, err := px.GetListener()
+	if err != nil {
+		return
+	}
+	defer client.Close()
+
+	// Create a channel to stop the proxy
+	px.stop = make(chan struct{})
+
+	// Add a waiting task
+	px.wg.Add(1)
+
+	srvAddr := net.UDPAddr{
+		Port: px.service.GetPort(),
+	}
+
+	for {
+		// Get a connection to the server for each new connection with the client
+		server, servErr := net.DialUDP(utils.UDP.String(), nil, &srvAddr)
+		// If there was an error, close the connection to the server and return
+		if servErr != nil {
+			return
+		}
+		defer server.Close()
+
+		go func() {
+			// TODO: Handle the middlewares! they only accept TCP connections
+			// Apply the middlewares to the connection
+			//udpProxy.middlewares.Apply(listener)
+
+			// Handle the connection between the client and the server
+			// NOTE: The handlers will defer the connections
+			px.handle(client, server)
+
+			// Finish the task
+			px.wg.Done()
+		}()
+	}
+}
+
+// Function to stop the proxy from runing
+func (px *udpProxy) Stop() (err error) {
+	// Stop the proxy if it is still alive
+	if px.GetStatus() != utils.StoppedStatus {
+		close(px.stop)
+		px.listener.Close()
+		// Wait for all the connections and the server to stop
+		px.wg.Wait()
+		return
+	}
+
+	err = fmt.Errorf("proxy not running")
+	return
+}
+
+// Get or create a new listener
+func (px *udpProxy) GetListener() (listener *net.UDPConn, err error) {
+	listener = px.listener
+
+	// Check if there is a listener
+	if listener == nil || px.GetStatus() != utils.RunningStatus {
+		// Get the address of the UDP server
+		addr := net.UDPAddr{
+			Port: px.service.GetPort(),
+		}
+
+		listener, err = net.ListenUDP(utils.UDP.String(), &addr)
+		if err != nil {
+			return
+		}
+		px.listener = listener
+		px.baseProxy.listener = listener
+	}
+
+	return
+}
+
+// TODO: Test this function
+// UDP asynchronous tunnel
+func (px *udpProxy) handle(client *net.UDPConn, server *net.UDPConn) {
+	var buf [2 << 10]byte
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	// Function to copy messages from one pipe to the other
+	var handle = func(from *net.UDPConn, to *net.UDPConn) {
+		n, addr, err := from.ReadFrom(buf[0:])
+		if err != nil {
+			lr.Log.Warn().Err(err)
+		}
+
+		_, err = to.WriteTo(buf[:n], addr)
+		if err != nil {
+			lr.Log.Warn().Err(err)
+		}
+	}
+
+	defer client.Close()
+	defer server.Close()
+
+	go handle(client, server)
+	go handle(server, client)
+
+	// Wait until the forwarding is done
+	wg.Wait()
+}
+
+func NewUDPProxy(port int) (proxy *udpProxy, err error) {
+	// Create a new proxy
+	proxy = &udpProxy{
+		baseProxy: newProxy(port, utils.UDP),
+	}
+
+	// Set the port
+	proxy.SetPort(port)
+	return
+}

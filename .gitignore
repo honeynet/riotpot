@@ -14,7 +14,7 @@
 workspace*.code-*
 
 # Transit folders
-_output/
+bin/
 
 # whatever the rules are, include all the `.md` files
 !*.md

@@ -3,9 +3,9 @@ package main
 import (
 	"testing"
 
-	lr "github.com/riotpot/internal/logger"
-	"github.com/riotpot/internal/plugins"
-	"github.com/riotpot/internal/services"
+	lr "github.com/riotpot/pkg/logger"
+	"github.com/riotpot/pkg/plugins"
+	"github.com/riotpot/pkg/service"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +22,7 @@ func TestLoadPlugins(t *testing.T) {
 	assert.Equal(t, 1, len(pgs))
 
 	plg := pgs[0]
-	i, ok := plg.(services.PluginService)
+	i, ok := plg.(service.PluginService)
 	if !ok {
 		lr.Log.Fatal().Err(err).Msgf("Service is not a plugin")
 	}

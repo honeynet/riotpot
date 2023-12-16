@@ -9,7 +9,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/riotpot/internal/services"
+	"github.com/riotpot/pkg/service"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/plgd-dev/go-coap/v2/message"
@@ -23,7 +23,7 @@ var (
 )
 
 func init() {
-	services.Services.Start()
+	service.Services.Start()
 }
 
 func TestCoapDiscovery(t *testing.T) {

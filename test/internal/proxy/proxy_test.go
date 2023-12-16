@@ -6,22 +6,23 @@ import (
 	"net"
 	"testing"
 
-	"github.com/riotpot/internal/globals"
-	"github.com/riotpot/internal/proxy"
-	"github.com/riotpot/internal/services"
+	"github.com/riotpot/pkg/proxy"
+	"github.com/riotpot/pkg/service"
+	"github.com/riotpot/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 const (
 	proxyPort  = 8080
 	serverPort = 8081
-	network    = globals.TCP
+	network    = utils.TCP
 )
 
 // Test to create a service, the ports at the end should be the same
 func TestCreateProxy(t *testing.T) {
 	// Instantiate the proxy
-	pr, err := proxy.NewProxyEndpoint(proxyPort, network)
+	pf := proxy.ProxyFactory{}
+	pr, err := pf.CreateProxy(proxyPort, network)
 
 	if err != nil {
 		t.Error(err)
@@ -44,13 +45,14 @@ func TestStartProxy(t *testing.T) {
 	ret := ""
 
 	// Instantiate the proxy
-	pr, err := proxy.NewProxyEndpoint(proxyPort, network)
+	pf := proxy.ProxyFactory{}
+	pr, err := pf.CreateProxy(proxyPort, network)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Create a new abstract service
-	service := services.NewService("http", serverPort, network, "", globals.Low)
+	service := service.NewService("http", serverPort, network, "", utils.Low)
 
 	// Set the service
 	pr.SetService(service)
@@ -118,13 +120,14 @@ func TestStopProxy(t *testing.T) {
 	errs := make(chan error, 1)
 
 	// Instantiate the proxy
-	pr, err := proxy.NewProxyEndpoint(proxyPort, network)
+	pf := proxy.ProxyFactory{}
+	pr, err := pf.CreateProxy(proxyPort, network)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Create a new abstract service
-	service := services.NewService("http", serverPort, network, "", globals.Low)
+	service := service.NewService("http", serverPort, network, "", utils.Low)
 
 	// Set the service
 	pr.SetService(service)
@@ -165,7 +168,7 @@ func TestCreateNewProxy(t *testing.T) {
 	// Create a new proxy manager
 	proxyManager := proxy.NewProxyManager()
 	// Add a proxy
-	_, err := proxyManager.CreateProxy(globals.TCP, proxyPort)
+	_, err := proxyManager.CreateProxy(utils.TCP, proxyPort)
 
 	// There would be an error if the proxy was already registered or the port is unavailable
 	if err != nil {
@@ -177,7 +180,7 @@ func TestDeleteProxy(t *testing.T) {
 	// Create a new proxy manager
 	proxyManager := proxy.NewProxyManager()
 	// Add a proxy
-	pe, err := proxyManager.CreateProxy(globals.TCP, proxyPort)
+	pe, err := proxyManager.CreateProxy(utils.TCP, proxyPort)
 	if err != nil {
 		t.Fatal(err)
 	}

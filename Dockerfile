@@ -32,18 +32,14 @@ COPY ui ui/
 # Copy only the app files in the image
 COPY api api/
 COPY cmd cmd/
-COPY internal internal/
 COPY pkg pkg/
-COPY tools tools/
+COPY plugins plugins/
 
 # Copy static files
 COPY statik/ statik/
 COPY build build/
 
 ADD Makefile .
-
-# Run the command from the Makefile to build the plugins
-# and riotpot
 RUN make
 
 FROM gcr.io/distroless/base-debian10 AS release

@@ -41,13 +41,13 @@ jobs:
         run: npm --prefix=./ui ci && npm --prefix=./ui run build
 
       - name: Build application
-        run: make build-all
+        run: make
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
         with:
           name: riotpot
-          path: bin
+          path: bin/riotpot
           if-no-files-found: error
 
   release:

@@ -13,5 +13,8 @@ func main() {
 	fmt.Println("░▒▓███ RIoIPot ███▓▒░")
 
 	// Parse the flags
-	ParseFlags()
+	cmd := NewRiotpotCommand()
+	if err := cmd.Execute(); err != nil {
+		panic(err)
+	}
 }

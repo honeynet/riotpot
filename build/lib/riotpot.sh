@@ -16,7 +16,7 @@ function riotpot::compile(){
 # This function compiles the plugins as <plugin_name>.so
 function riotpot::compile::plugins(){
 
-    for plugin in "$RIOTPOT_ROOT/pkg/plugin"/*/; do
+    for plugin in "$RIOTPOT_PLUGINS"/*/; do
         pg=$(basename "$plugin")
         echo "$plugin"
         echo "$pg"
