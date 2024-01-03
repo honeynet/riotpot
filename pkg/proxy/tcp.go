@@ -26,57 +26,63 @@ func (px *tcpProxy) Start() (err error) {
 		return fmt.Errorf("service not set")
 	}
 
+	// Set stop channel
+	px.quit = make(chan struct{})
+
 	// Get the listener or create a new one
 	listener, err := px.GetListener()
 	if err != nil {
 		return
 	}
 
-	// Set stop channel
-	px.stop = make(chan struct{})
-
 	// Add a waiting task
-	px.wg.Add(1)
+	var wg sync.WaitGroup
+	wg.Add(1)
 
 	go func() {
-		defer px.wg.Done()
+		defer wg.Done()
 
 		for {
-			// Accept the next connection
-			// This goes first as it is the method we have to check if the proxy is running
-			// There is no need to continue if it is not
-			client, err := listener.Accept()
-			if err != nil {
+
+			select {
+			case <-px.quit:
 				return
+			default:
+				// Accept the next connection
+				// This goes first as it is the method we have to check if the proxy is running
+				// There is no need to continue if it is not
+				client, err := listener.Accept()
+				if err != nil {
+					return
+				}
+				defer client.Close()
+
+				// Apply the middlewares to the connection before dialing the server
+				_, err = px.middlewares.Apply(client)
+				if err != nil {
+					return
+				}
+
+				// Get a connection to the server for each new connection with the client
+				server, servErr := net.DialTimeout(utils.TCP.String(), px.service.GetAddress(), 1*time.Second)
+
+				// If there was an error, close the connection to the server and return
+				if servErr != nil {
+					return
+				}
+				defer server.Close()
+
+				// Add a waiting task
+				wg.Add(1)
+
+				go func() {
+					defer wg.Done()
+					// Handle the connection between the client and the server
+					// NOTE: The handlers will defer the connections
+					px.handle(client, server)
+				}()
 			}
-			defer client.Close()
 
-			// Apply the middlewares to the connection before dialing the server
-			_, err = px.middlewares.Apply(client)
-			if err != nil {
-				return
-			}
-
-			// Get a connection to the server for each new connection with the client
-			server, servErr := net.DialTimeout(utils.TCP.String(), px.service.GetAddress(), 1*time.Second)
-
-			// If there was an error, close the connection to the server and return
-			if servErr != nil {
-				return
-			}
-			defer server.Close()
-
-			// Add a waiting task
-			px.wg.Add(1)
-
-			go func() {
-				// Handle the connection between the client and the server
-				// NOTE: The handlers will defer the connections
-				px.handle(client, server)
-
-				// Finish the task
-				px.wg.Done()
-			}()
 		}
 	}()
 
@@ -87,7 +93,7 @@ func (px *tcpProxy) GetListener() (listener net.Listener, err error) {
 	listener = px.listener
 
 	// Get the listener only
-	if listener == nil || px.GetStatus() != utils.RunningStatus {
+	if listener == nil || px.IsRunning() != utils.RunningStatus {
 		listener, err = px.NewListener()
 		if err != nil {
 			return

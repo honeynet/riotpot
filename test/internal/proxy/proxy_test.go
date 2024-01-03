@@ -155,12 +155,12 @@ func TestStopProxy(t *testing.T) {
 	pr.Start()
 
 	// Give the proxy some time to start
-	alive := pr.GetStatus()
+	alive := pr.IsRunning()
 	assert.Equal(alive, true, "The proxy is running")
 
 	// Stop the service
 	pr.Stop()
-	alive = pr.GetStatus()
+	alive = pr.IsRunning()
 	assert.Equal(alive, false, "The proxy is stop")
 }
 

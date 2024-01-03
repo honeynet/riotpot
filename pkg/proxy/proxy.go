@@ -1,9 +1,6 @@
 package proxy
 
 import (
-	"fmt"
-	"sync"
-
 	"github.com/google/uuid"
 	"github.com/riotpot/pkg/service"
 	"github.com/riotpot/pkg/utils"
@@ -13,13 +10,13 @@ import (
 type Proxy interface {
 	// Start and stop
 	Start() error
-	Stop() error
+	Stop()
 
 	// Getters
 	GetID() string
 	GetPort() int
 	GetNetwork() utils.Network
-	GetStatus() utils.Status
+	IsRunning() utils.Status
 	GetService() service.Service
 
 	// Setters
@@ -42,7 +39,7 @@ type baseProxy struct {
 
 	// Create a channel to stop the proxy gracefully
 	// This channel is also used to guess if the proxy is running
-	stop chan struct{}
+	quit chan struct{}
 
 	// Pointer to the slice of middlewares for the proxies
 	// All the proxies should apply and share the same middlewares
@@ -52,54 +49,26 @@ type baseProxy struct {
 	// Service to proxy
 	service service.Service
 
-	// Waiting group for the server
-	wg sync.WaitGroup
-
 	// Generic listener
 	listener interface{ Close() error }
 }
 
 // Function to stop the proxy from runing
-func (pe *baseProxy) Stop() (err error) {
-	// Stop the proxy if it is still alive
-	if pe.GetStatus() == utils.RunningStatus {
-		close(pe.stop)
-
-		if pe.listener != nil {
-			pe.listener.Close()
-		}
-
-		// Wait for all the connections and the server to stop
-		pe.wg.Wait()
-		return
-	}
-
-	err = fmt.Errorf("proxy not running")
-	return
+func (pe *baseProxy) Stop() {
+	close(pe.quit)
 }
 
-// Simple function to check if the proxy is running
-func (pe *baseProxy) GetStatus() (alive utils.Status) {
-	// When the proxy is instantiated, the stop channel is nil;
-	// therefore, the proxy is not running
-	if pe.stop == nil {
+func (b *baseProxy) IsRunning() (alive utils.Status) {
+	if b.quit == nil {
 		return
 	}
 
-	// [7/4/2022] NOTE: The logic of this block is difficult to read.
-	// However, the select block will only give the default value when there is nothing
-	// to read from the channel while the channel is still open.
-	// When the channel is closed, the first case is not blocked, so we can not
-	// read "anything else" from the channel
 	select {
-	// Return if the channel is closed
-	case <-pe.stop:
-	// Return if the channel is open
+	case <-b.quit:
+		return
 	default:
-		alive = utils.RunningStatus
+		return utils.RunningStatus
 	}
-
-	return
 }
 
 func (pe *baseProxy) GetID() string {
@@ -140,6 +109,5 @@ func newProxy(port int, network utils.Network) (px *baseProxy) {
 		port:        port,
 		network:     network,
 		middlewares: Middlewares,
-		wg:          sync.WaitGroup{},
 	}
 }

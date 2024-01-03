@@ -75,7 +75,7 @@ func NewProxy(px proxy.Proxy) *GetProxy {
 		ID:      px.GetID(),
 		Port:    px.GetPort(),
 		Network: px.GetNetwork().String(),
-		Status:  px.GetStatus().String(),
+		Status:  px.IsRunning().String(),
 		Service: serv,
 	}
 }
@@ -232,7 +232,7 @@ func changeProxyStatus(ctx *gin.Context) {
 	case utils.RunningStatus:
 		err = pe.Start()
 	case utils.StoppedStatus:
-		err = pe.Stop()
+		pe.Stop()
 	default:
 		err = fmt.Errorf("status not allowed")
 	}
@@ -243,7 +243,7 @@ func changeProxyStatus(ctx *gin.Context) {
 	}
 
 	// Serialize the status and send it as the response
-	ctx.JSON(http.StatusOK, gin.H{"status": pe.GetStatus().String()})
+	ctx.JSON(http.StatusOK, gin.H{"status": pe.IsRunning().String()})
 }
 
 // POST request to change the port of the proxy

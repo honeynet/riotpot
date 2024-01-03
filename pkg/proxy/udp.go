@@ -21,6 +21,9 @@ func (px *udpProxy) Start() (err error) {
 		return
 	}
 
+	// Create a channel to stop the proxy
+	px.quit = make(chan struct{})
+
 	// Get the listener or create a new one
 	client, err := px.GetListener()
 	if err != nil {
@@ -28,56 +31,48 @@ func (px *udpProxy) Start() (err error) {
 	}
 	defer client.Close()
 
-	// Create a channel to stop the proxy
-	px.stop = make(chan struct{})
-
 	// Add a waiting task
-	px.wg.Add(1)
+	var wg sync.WaitGroup
+	wg.Add(1)
 
 	srvAddr := net.UDPAddr{
 		Port: px.service.GetPort(),
 	}
 
-	for {
-		// Get a connection to the server for each new connection with the client
-		server, servErr := net.DialUDP(utils.UDP.String(), nil, &srvAddr)
-		// If there was an error, close the connection to the server and return
-		if servErr != nil {
-			return
+	go func() {
+		defer wg.Done()
+
+		for {
+			select {
+			case <-px.quit:
+				return
+
+			default:
+				// Get a connection to the server for each new connection with the client
+				server, servErr := net.DialUDP(utils.UDP.String(), nil, &srvAddr)
+				// If there was an error, close the connection to the server and return
+				if servErr != nil {
+					return
+				}
+				defer server.Close()
+
+				// Add a waiting task
+				wg.Add(1)
+
+				go func() {
+					defer wg.Done()
+					// TODO: Handle the middlewares! they only accept TCP connections
+					// Apply the middlewares to the connection
+					//udpProxy.middlewares.Apply(listener)
+
+					// Handle the connection between the client and the server
+					// NOTE: The handlers will defer the connections
+					px.handle(client, server)
+				}()
+			}
 		}
-		defer server.Close()
+	}()
 
-		go func() {
-			// TODO: Handle the middlewares! they only accept TCP connections
-			// Apply the middlewares to the connection
-			//udpProxy.middlewares.Apply(listener)
-
-			// Handle the connection between the client and the server
-			// NOTE: The handlers will defer the connections
-			px.handle(client, server)
-
-			// Finish the task
-			px.wg.Done()
-		}()
-	}
-}
-
-// Function to stop the proxy from runing
-func (px *udpProxy) Stop() (err error) {
-	// Stop the proxy if it is still alive
-	if px.GetStatus() != utils.StoppedStatus {
-		close(px.stop)
-
-		if px.listener != nil {
-			px.listener.Close()
-		}
-
-		// Wait for all the connections and the server to stop
-		px.wg.Wait()
-		return
-	}
-
-	err = fmt.Errorf("proxy not running")
 	return
 }
 
@@ -86,7 +81,7 @@ func (px *udpProxy) GetListener() (listener *net.UDPConn, err error) {
 	listener = px.listener
 
 	// Check if there is a listener
-	if listener == nil || px.GetStatus() != utils.RunningStatus {
+	if listener == nil || px.IsRunning() != utils.RunningStatus {
 		// Get the address of the UDP server
 		addr := net.UDPAddr{
 			Port: px.service.GetPort(),

@@ -184,7 +184,7 @@ func newServiceAndProxy(ctx *gin.Context) {
 		ID:      pe.GetID(),
 		Port:    pe.GetPort(),
 		Network: pe.GetNetwork().String(),
-		Status:  pe.GetStatus().String(),
+		Status:  pe.IsRunning().String(),
 		Service: NewService(sv),
 	}
 

@@ -1,4 +1,4 @@
-FROM golang:1.18 AS builder
+FROM golang:1.21 AS builder
 
 # Set the working directory to golang working space
 WORKDIR /riotpot
@@ -27,7 +27,7 @@ COPY build build/
 ADD Makefile .
 RUN make compile
 
-FROM golang:1.18 AS release
+FROM golang:1.21 AS release
 
 #ENV GIN_MODE=release
 
