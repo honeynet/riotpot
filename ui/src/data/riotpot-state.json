@@ -149,7 +149,7 @@
     {
       "id": 0,
       "name": "Lab-1",
-      "host": "localhost:2022",
+      "host": "localhost:3000",
       "description": "Laboratory 1",
       "profile": {
         "id": "507ba0e-1ca3-0c20-ab57-a3565fa661ca",

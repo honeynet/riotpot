@@ -12,10 +12,11 @@ import (
 
 var Plugin string
 
+// [1-3-2024] TODO: implement upnp over UDP on port 1900
 const (
 	name    = "UPNP"
 	network = utils.TCP
-	port    = 1900
+	port    = 5000
 )
 
 func init() {

@@ -5,6 +5,7 @@ set -o nounset
 set -o pipefail
 
 function riotpot::ui::build(){
+    npm install react-scripts --silent
     npm install ui --silent
     npm --prefix="ui" --omit="dev" run build 
 }

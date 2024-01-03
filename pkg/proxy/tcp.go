@@ -28,10 +28,12 @@ func (px *tcpProxy) Start() (err error) {
 
 	// Get the listener or create a new one
 	listener, err := px.GetListener()
-
 	if err != nil {
 		return
 	}
+
+	// Set stop channel
+	px.stop = make(chan struct{})
 
 	// Add a waiting task
 	px.wg.Add(1)

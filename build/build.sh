@@ -14,4 +14,6 @@ source "${RIOTPOT_ROOT}/build/lib/ui.sh"
 riotpot::golang::setup_env
 riotpot::requirements::install
 riotpot::golang::install_requirements
+
+# [1-3-2024] TODO: building in docker fails to complete.
 riotpot::ui::build

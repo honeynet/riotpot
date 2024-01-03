@@ -54,7 +54,7 @@ For this, the honeypot manages a number of user-defined `proxies` that relays co
 This way, RIoTPot can decide how and where to route incomming attacks.
 The logic used to determine how to handle the incomming attack is implemented in the form of `middlewares` [^middlewares].
 To manage services, middlewares and proxies, RIoTPot ships with a REST API [^api] and a webapp UI [^ui] out-of-the-box.
-The UI can be accessed through your browser at `localhost:2022` and you can fiddle with API endpoints at `localhost:2022/api/swagger` showing a [Swagger](https://swagger.io/) interface.
+The UI can be accessed through your browser at `localhost:3000` and you can fiddle with API endpoints at `localhost:3000/api/swagger` showing a [Swagger](https://swagger.io/) interface.
 
 [^proxies]: Internal and surrounding services are not accessible through the Internet.
     Internal services are integrated and only accessible to RIoTPot.
@@ -105,6 +105,30 @@ Overall, you have three options.
 **The first** is to download a RIoTPot release; you can either choose to download the latest release, or previous one.
 **The second option** is to build the project yourself.
 **The last option** is to use the source code to create a Docker container with RIoTPot and some additional applications to enhance the honeypot.
+
+In addition, RIoTPot comes with some flags to determine how you want to run RIoTPot.
+
+```
+Commands:
+---------
+    --services: Starts a list of comma-separated services. E.g.: mqtt,ssh,telnet
+    --output: Path to output file. E.g., 'path/to/riotpot.log'
+    --plugins: Path to plugins folder. Defaults to 'plugins/*.so'
+
+server
+    --whitelist: Comma-separated list of allowed hosts to interact with the API. Default: http://localhost
+    --port: Server port. Defaults to 3000
+    --with-ui: Serve the UI as well
+```
+
+Usage examples:
+```bash
+# As a regular application running multiple low-interaction honeypots
+riotpot --services ssh,telnet,http
+# OR
+# As a server with a UI listening in port 3000
+riotpot server --with-ui
+``` 
 
 <details open>
     <summary><b>Using a Release Version</b></summary>

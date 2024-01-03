@@ -64,7 +64,11 @@ func (pe *baseProxy) Stop() (err error) {
 	// Stop the proxy if it is still alive
 	if pe.GetStatus() == utils.RunningStatus {
 		close(pe.stop)
-		pe.listener.Close()
+
+		if pe.listener != nil {
+			pe.listener.Close()
+		}
+
 		// Wait for all the connections and the server to stop
 		pe.wg.Wait()
 		return
@@ -136,7 +140,6 @@ func newProxy(port int, network utils.Network) (px *baseProxy) {
 		port:        port,
 		network:     network,
 		middlewares: Middlewares,
-		stop:        make(chan struct{}),
 		wg:          sync.WaitGroup{},
 	}
 }

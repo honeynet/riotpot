@@ -18,8 +18,8 @@ servers:
         default: "localhost"
       port:
         enum:
-          - "2022"
-        default: "2022"
+          - "3000"
+        default: "3000"
 
 tags:
   - name: Proxies

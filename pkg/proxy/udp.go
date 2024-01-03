@@ -67,7 +67,11 @@ func (px *udpProxy) Stop() (err error) {
 	// Stop the proxy if it is still alive
 	if px.GetStatus() != utils.StoppedStatus {
 		close(px.stop)
-		px.listener.Close()
+
+		if px.listener != nil {
+			px.listener.Close()
+		}
+
 		// Wait for all the connections and the server to stop
 		px.wg.Wait()
 		return

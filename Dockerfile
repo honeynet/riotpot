@@ -1,18 +1,3 @@
-FROM node:19.4.0-alpine AS ui
-
-# set working directory
-WORKDIR /app
-
-# add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
-
-# add app
-COPY ui/ .
-RUN npm install --silent
-
-# Creates the build
-RUN npm run build --omit=dev
-
 FROM golang:1.18 AS builder
 
 # Set the working directory to golang working space
@@ -33,16 +18,16 @@ COPY ui ui/
 COPY api api/
 COPY cmd cmd/
 COPY pkg pkg/
-COPY plugins plugins/
+COPY plugin plugin/
 
 # Copy static files
 COPY statik/ statik/
 COPY build build/
 
 ADD Makefile .
-RUN make
+RUN make compile
 
-FROM gcr.io/distroless/base-debian10 AS release
+FROM golang:1.18 AS release
 
 #ENV GIN_MODE=release
 
@@ -52,6 +37,6 @@ WORKDIR /riotpot
 COPY --from=builder /riotpot/bin/riotpot ./
 
 # UI port
-EXPOSE 2022
+EXPOSE 3000
 
 CMD ["./riotpot"]

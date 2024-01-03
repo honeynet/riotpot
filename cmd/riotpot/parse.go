@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"slices"
+	"strings"
 	"syscall"
 	"time"
 
@@ -13,7 +15,6 @@ import (
 	"github.com/riotpot/pkg/api"
 	"github.com/riotpot/pkg/logger"
 	"github.com/riotpot/pkg/plugins"
-	"github.com/riotpot/pkg/proxy"
 	"github.com/riotpot/ui"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
@@ -32,17 +33,25 @@ func setup(output string, pluginsPath string, services []string) {
 		panic(err)
 	}
 
+	sLower := make([]string, len(services))
+	for i, str := range services {
+		sLower[i] = strings.ToLower(str)
+	}
+
 	// Start services
 	for _, p := range px {
-		prx, err := proxy.Proxies.GetProxy(p.GetID())
+		sName := p.GetService().GetName()
+		lname := strings.ToLower(sName)
+		if !slices.Contains(sLower, lname) {
+			continue
+		}
+
+		err = p.Start()
 		if err != nil {
 			panic(err)
 		}
 
-		err = prx.Start()
-		if err != nil {
-			panic(err)
-		}
+		logger.Log.Log().Msg(fmt.Sprintf("Proxy %s started. Listening in %d", p.GetService().GetName(), p.GetPort()))
 	}
 }
 
@@ -87,7 +96,7 @@ func parseSetupFlags(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	srvFlag, err := fgs.GetStringArray("services")
+	srvFlag, err := fgs.GetStringSlice("services")
 	if err != nil {
 		panic(err)
 	}
@@ -114,7 +123,7 @@ func NewRootCommand() *cobra.Command {
 	}
 
 	rootFlags := cmds.Flags()
-	rootFlags.StringArray("services", []string{}, "Starts a list of services")
+	rootFlags.StringSlice("services", []string{}, "Comma-separated list of services to start")
 	rootFlags.String("output", "", "Path to output file. E.g., 'path/to/riotpot.log'")
 	rootFlags.String("plugins", "plugins/*.so", "Path to plugins folder")
 
@@ -130,7 +139,7 @@ func NewServerCommand() *cobra.Command {
 			parseSetupFlags(cmd, args)
 			fgs := cmd.Flags()
 
-			whitelistFlag, err := fgs.GetStringArray("whitelist")
+			whitelistFlag, err := fgs.GetStringSlice("whitelist")
 			if err != nil {
 				panic(err)
 			}
@@ -155,8 +164,8 @@ func NewServerCommand() *cobra.Command {
 	}
 
 	apiFlags := cmdApi.Flags()
-	apiFlags.StringArray("whitelist", []string{"http://localhost"}, "List of allowed hosts to interact with the API. Default: http://localhost")
-	apiFlags.Int("port", 3000, "Server port port")
+	apiFlags.StringSlice("whitelist", []string{"http://localhost"}, "Comma-separated list of allowed hosts to interact with the API. Default: http://localhost")
+	apiFlags.Int("port", 3000, "Server port")
 	apiFlags.Bool("with-ui", false, "Serve the UI as well")
 
 	return cmdApi

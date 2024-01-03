@@ -10,7 +10,7 @@ export type Backend = {
 
 export const DefaultBackend = {
   host: "localhost",
-  port: 2022,
+  port: 3000,
 } as Backend;
 
 export const backend = atom({
