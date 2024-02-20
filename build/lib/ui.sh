@@ -4,12 +4,12 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-function riotpot::ui::build(){
-    npm install react-scripts --silent
-    npm install ui --silent
-    npm --prefix="ui" --omit="dev" run build 
+function riotpot::ui::build() {
+    cd ui
+    npm install
+    npm run build
 }
 
-function riotpot::ui::serve_dev(){
+function riotpot::ui::serve_dev() {
     serve -s ./ui/build
 }
