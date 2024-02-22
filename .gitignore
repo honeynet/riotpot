@@ -18,3 +18,14 @@ bin/
 
 # whatever the rules are, include all the `.md` files
 !*.md
+
+# build secrets keys while building docker compose
+build/docker/ftp.env
+build/docker/service/custom_httpd/server.crt
+build/docker/service/custom_httpd/server.key
+build/docker/service/custom_sshd/ssh_users.txt
+build/docker/service/custom_sshd/keys/riopot_rsa
+build/docker/service/custom_sshd/keys/riopot_rsa.pub
+
+# tcpdump
+tcpdump
