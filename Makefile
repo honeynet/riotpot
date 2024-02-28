@@ -18,4 +18,4 @@ docker-run:
 docker-build:
 	docker build -t riotpot:latest .
 compose:
-	docker compose -p riotpot -f build/docker/docker-compose.yaml up -d --build
+	docker-compose -p riotpot -f build/docker/docker-compose.yaml up -d --build
