@@ -136,3 +136,31 @@ func NewProxyManager() *proxyManager {
 		proxies:     make([]Proxy, 0),
 	}
 }
+
+// Returns proxy at a particular port
+func (pm *proxyManager)GetProxyByPort(port int) (pe Proxy, err error) {
+	// Get all the proxies registered
+	proxies := pm.GetProxies()
+
+	for _, proxy := range proxies {
+		if proxy.GetPort() == port {
+			pe = proxy
+			return
+		}
+	}
+	err = fmt.Errorf("proxy not found")
+	return 
+}
+
+// Returns proxy of the provided status
+func (pm *proxyManager) GetProxyByStatus(status string) (pe []Proxy) {
+	proxies := pm.GetProxies()
+
+	for _, proxy := range proxies {
+		if proxy.IsRunning().String() == status {
+			pe = append(pe, proxy)
+		}
+	}
+
+	return pe
+}

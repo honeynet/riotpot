@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/riotpot/pkg/proxy"
@@ -80,20 +81,75 @@ func NewProxy(px proxy.Proxy) *GetProxy {
 	}
 }
 
-// TODO [7/17/2022]: Add filters to this method
 // GET proxies registered
-// Contains a filter to get proxies by port
+// Contains a filter to get proxies by port, id, status
 func getProxies(ctx *gin.Context) {
-	casted := []GetProxy{}
+	id := ctx.Query("id")
+	portStr := ctx.Query("port")
+	status := ctx.Query("status")
 
-	// Iterate through the proxies registered
+	switch {
+	case id != "":
+		getProxiesByID(ctx, id)
+
+	case portStr != "":
+		getProxiesByPort(ctx, portStr)
+
+	case status != "":
+		getProxiesByStatus(ctx, status)
+
+	default:
+		getAllProxies(ctx)
+	}
+}
+
+func getProxiesByID(ctx *gin.Context, id string) {
+	pr, err := proxy.Proxies.GetProxy(id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// Serialize the proxy and send it as a response
+	px := NewProxy(pr)
+	ctx.JSON(http.StatusOK, px)
+}
+
+func getProxiesByPort(ctx *gin.Context, portStr string) {
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid port number"})
+		return
+	}
+
+	pr, err := proxy.Proxies.GetProxyByPort(port)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// Serialize the proxy and send it as a response
+	px := NewProxy(pr)
+	ctx.JSON(http.StatusOK, px)
+}
+
+func getProxiesByStatus(ctx *gin.Context, status string) {
+	casted := make([]GetProxy, 0)
+	for _, pr := range proxy.Proxies.GetProxyByStatus(status) {
+		// Serialize the proxy 
+		px := NewProxy(pr)
+		casted = append(casted, *px)
+	}
+
+	ctx.JSON(http.StatusOK, casted)
+}
+
+func getAllProxies(ctx *gin.Context) {
+	casted := make([]GetProxy, 0)
 	for _, px := range proxy.Proxies.GetProxies() {
 		// Serialize the proxy
 		pr := NewProxy(px)
-		// Append the proxy to the casted
+		//Append the proxy to the casted
 		casted = append(casted, *pr)
 	}
-
 	// Set the header and transform the struct to JSON format
 	ctx.JSON(http.StatusOK, casted)
 }
