@@ -65,6 +65,7 @@ func TestApiService(t *testing.T) {
 		Host:    "localhost",
 		Port:    8080,
 		Network: utils.TCP.String(),
+		Interaction: "low",
 	}
 
 	router := SetupRouter()
