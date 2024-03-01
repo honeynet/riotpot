@@ -72,7 +72,7 @@ func createApiRouter(whitelist []string, startUi bool) *gin.Engine {
 
 	group := router.Group("/api/")
 	api.ProxiesRouter.AddToGroup(group)
-	api.ServiceRouter.AddToGroup(group)
+	api.ServicesRouter.AddToGroup(group)
 
 	if startUi {
 		ui.AddRoutes(router)
